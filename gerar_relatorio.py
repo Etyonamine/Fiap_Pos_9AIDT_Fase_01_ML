@@ -216,7 +216,7 @@ def build_chart_section(cell_idx: int, images: dict) -> str:
 
     html_parts = []
     for i, b64 in enumerate(cell_images):
-        meta = metas[i] if i < len(metas) else (f"Fig.", "Gráfico", "")
+        meta = metas[i] if i < len(metas) else (f"Fig. {i + 1}", "Gráfico", "")
         fig_num, caption, interpretation = meta
 
         html_parts.append(f"""
