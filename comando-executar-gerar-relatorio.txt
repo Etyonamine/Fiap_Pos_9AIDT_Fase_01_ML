@@ -1,0 +1,2 @@
+executar este comando no powershell
+C:\Fiap_Pos_9AIDT_Fase_01_ML\.venv\Scripts\python.exe gerar_relatorio.py

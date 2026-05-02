@@ -13,17 +13,25 @@ Dependências:
     pip install weasyprint
 """
 
+import os, ctypes
+
+# adicionar o diretório de DLLs do MSYS2 antes de qualquer import que carregue bibliotecas nativas
+os.add_dll_directory(r"C:\msys64\ucrt64\bin")
+
+for name in ("libpango-1.0-0.dll","libpangocairo-1.0-0.dll","libcairo-2.dll",
+             "libharfbuzz-0.dll","libfreetype-6.dll","libfontconfig-1.dll"):
+    try:
+        ctypes.WinDLL(os.path.join(r"C:\msys64\ucrt64\bin", name))
+    except OSError:
+        # ignorar aqui; cffi dará erro detalhado se algo faltar
+        pass
+# agora importe WeasyPrint (após registrar o diretório de DLLs)
+from weasyprint import HTML, CSS
 import json
-import os
+
 import base64
 from datetime import datetime
 
-try:
-    from weasyprint import HTML, CSS
-except ImportError:
-    raise ImportError(
-        "WeasyPrint não está instalado. Execute: pip install weasyprint"
-    )
 
 # ── Configurações ──────────────────────────────────────────────────────────────
 NOTEBOOK_PATH = "TechChallengeTriagemFeminino.ipynb"
@@ -495,17 +503,17 @@ def build_html(images: dict, generated_at: str) -> str:
   </tr>
   <tr>
     <td>Machine Learning</td>
-    <td>https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML</td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML">https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML</a></td>
     <td>Python · Jupyter / XGBoost</td>
   </tr>
   <tr>
     <td>API REST</td>
-    <td>https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API</td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API">https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API</a></td>
     <td>Python · Flask / FastAPI</td>
   </tr>
   <tr>
     <td>Frontend Web</td>
-    <td>https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB</td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB">https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB</a></td>
     <td>JavaScript / TypeScript</td>
   </tr>
 </table>
@@ -786,7 +794,7 @@ weighted avg       0.93      0.92      0.92    551,719
   Num sistema de triagem médica, <strong>errar para o lado da segurança</strong> é preferível.
   Um <strong>falso-negativo</strong> (não identificar uma vítima de violência sexual) tem custo
   muito mais alto do que um falso-positivo (acionar protocolos desnecessariamente). Por isso
-  priorizamos <strong>Recall</strong> e <strong>F1-score</strong> em detrimento da acurácia pura.
+  priorizei o <strong>Recall</strong> e <strong>F1-score</strong> em detrimento da acurácia pura.
   O <strong>ROC-AUC</strong> complementa avaliando o modelo em todos os limiares de decisão
   possíveis.
 </p>
@@ -870,11 +878,17 @@ proba = model.predict_proba(X_imputed)[:, 1]   # P(violência sexual)
 <p>A solução completa é composta por três repositórios integrados:</p>
 <ul>
   <li><strong>ML:</strong> Notebook com análise exploratória, pré-processamento, treinamento
-      e persistência do modelo.</li>
+      e persistência do modelo.<br />
+      Clique aqui no <strong>Link do Github</strong> = <a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML">Fiap_Pos_9AIDT_Fase_01_ML</a>
+  </li>
   <li><strong>API:</strong> Serviço REST que carrega o modelo treinado e expõe endpoints de
-      predição.</li>
+      predição.<br />
+      Clique aqui no <strong>Link do Github</strong> = <a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API">Fiap_Pos_9AIDT_Fase_01_API</a>
+  </li>
   <li><strong>WEB:</strong> Interface web para que profissionais de saúde realizem a triagem
-      interativamente.</li>
+      interativamente. <br />
+      Clique aqui no <strong>Link do Github</strong> = <a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_WEB">Fiap_Pos_9AIDT_Fase_01_WEB</a>
+  </li>
 </ul>
 <div class="warning-box">
   ⚠️ <strong>Aviso Final:</strong> Este modelo é um instrumento de apoio e não substitui o
