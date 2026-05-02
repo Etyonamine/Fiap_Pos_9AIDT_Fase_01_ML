@@ -503,17 +503,17 @@ def build_html(images: dict, generated_at: str) -> str:
   </tr>
   <tr>
     <td>Machine Learning</td>
-    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML">https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML</a></td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML">Clique aqui para baixar</a></td>
     <td>Python · Jupyter / XGBoost</td>
   </tr>
   <tr>
     <td>API REST</td>
-    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API">https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API</a></td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API">Clique aqui para baixar</a></td>
     <td>Python · Flask / FastAPI</td>
   </tr>
   <tr>
     <td>Frontend Web</td>
-    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB">https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB</a></td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB">Clique aqui para baixar</a></td>
     <td>JavaScript / TypeScript</td>
   </tr>
 </table>
