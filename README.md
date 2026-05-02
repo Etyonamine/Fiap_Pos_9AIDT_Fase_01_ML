@@ -57,7 +57,7 @@ O objetivo é auxiliar profissionais de saúde na **triagem clínica**, identifi
 
 ## Pré-requisitos
 
-- **Python** 3.10 ou superior
+- **Python** 3.14 ou superior
 - **pip** ou **conda** para gerenciamento de pacotes
 - Mínimo de **4 GB de RAM** recomendados (os datasets SINAN podem ser grandes)
 
