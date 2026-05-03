@@ -550,6 +550,7 @@ code { padding: 1pt 3pt; }
 }
 .arch-diagram img {
     max-width: 100%;
+    height: auto;
     border: 0.5pt solid #ddd;
 }
 
@@ -1123,6 +1124,7 @@ proba = model.predict_proba(X_imputed)[:, 1]   # P(violência sexual)
   é sempre responsabilidade do médico ou enfermeiro.
 </div>
 
+{arch_section}
 </body>
 </html>"""
 
