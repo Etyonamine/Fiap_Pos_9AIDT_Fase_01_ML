@@ -274,7 +274,7 @@ body {
 .cover {
     page-break-after: always;
     text-align: center;
-    padding-top: 80pt;
+    padding-top: 60pt;
 }
 .cover-title {
     font-size: 28pt;
@@ -444,8 +444,43 @@ def build_html(images: dict, generated_at: str) -> str:
     FIAP Pós-Graduação · Turma 9AIDT · 2026<br/>
     Gerado em: {generated_at}
   </p>
-
-  <table style="margin-top:30pt; font-size:8.5pt;">
+  <table style="margin-top:20pt; font-size:7pt;text-align:left;">
+    <tr>
+      <th colspan = "2">Referência dos DataSet</th>
+    </tr>
+    <tr>
+      <th>Item</th>
+      <th>Descrição</th>
+    </tr>
+    <tr>
+      <td>
+        Dicionário de dados do dataset
+      </td>
+      <td>
+        SINAN (Sistema de Informação de Agravos de Notificação) – Ministério da Saúde do Brasil<br/>
+        Dicionário de variáveis: <code>documentos/DIC_DADOS_NET_Violencias_v5.pdf</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Link de download do dataset
+      </td>
+      <td>
+        <a href="https://tabnet.datasus.gov.br/cgi/deftohtm.exe?sinannet/cnv/violebr.def">Link DATASUS - TABNET - VIOLÊNCIA INTERPESSOAL/AUTOPROVOCADA - Brasil</a>
+      </td>
+    </tr>
+  </table>
+  <table style="margin-top:20pt; font-size:7pt;text-align:left;">
+    <tr>
+      <th>Video - apresentação do Tech Challenge</th>      
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Video - apresentação do Tech Challenge</a>
+      </td>
+    </tr>
+  </table>
+  <table style="margin-top:20pt; font-size:7pt;text-align:left;">
     <tr>
       <th>Repositório</th>
       <th>URL</th>
@@ -453,17 +488,17 @@ def build_html(images: dict, generated_at: str) -> str:
     </tr>
     <tr>
       <td>ML (Machine Learning)</td>
-      <td>https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML</td>
+      <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML">https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML</a></td>
       <td>Notebook, datasets, modelos treinados</td>
     </tr>
     <tr>
       <td>API (Flask/FastAPI)</td>
-      <td>https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API</td>
+      <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API">https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API</a></td>
       <td>API REST para servir o modelo</td>
     </tr>
     <tr>
       <td>WEB (Frontend)</td>
-      <td>https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB</td>
+      <td><a href="https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB">https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB</a></td>
       <td>Interface web para triagem</td>
     </tr>
   </table>
