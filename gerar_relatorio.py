@@ -13,24 +13,34 @@ Dependências:
     pip install weasyprint
 """
 
-import os, ctypes
+import os, ctypes, sys
 
 # adicionar o diretório de DLLs do MSYS2 antes de qualquer import que carregue bibliotecas nativas
-os.add_dll_directory(r"C:\msys64\ucrt64\bin")
-
-for name in ("libpango-1.0-0.dll","libpangocairo-1.0-0.dll","libcairo-2.dll",
-             "libharfbuzz-0.dll","libfreetype-6.dll","libfontconfig-1.dll"):
+if sys.platform == "win32":
     try:
-        ctypes.WinDLL(os.path.join(r"C:\msys64\ucrt64\bin", name))
-    except OSError:
-        # ignorar aqui; cffi dará erro detalhado se algo faltar
+        os.add_dll_directory(r"C:\msys64\ucrt64\bin")
+    except (AttributeError, OSError):
         pass
+
+    for name in ("libpango-1.0-0.dll","libpangocairo-1.0-0.dll","libcairo-2.dll",
+                 "libharfbuzz-0.dll","libfreetype-6.dll","libfontconfig-1.dll"):
+        try:
+            ctypes.WinDLL(os.path.join(r"C:\msys64\ucrt64\bin", name))
+        except OSError:
+            # ignorar aqui; cffi dará erro detalhado se algo faltar
+            pass
 # agora importe WeasyPrint (após registrar o diretório de DLLs)
 from weasyprint import HTML, CSS
 import json
 
 import base64
+import io
 from datetime import datetime
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
 
 # ── Configurações ──────────────────────────────────────────────────────────────
@@ -238,6 +248,135 @@ def build_chart_section(cell_idx: int, images: dict) -> str:
     return "\n".join(html_parts)
 
 
+def generate_architecture_image() -> str:
+    """Gera diagrama de arquitetura dos componentes e retorna como base64 PNG."""
+    fig, ax = plt.subplots(figsize=(12, 5))
+    ax.set_xlim(0, 12)
+    ax.set_ylim(0, 5)
+    ax.axis("off")
+    ax.set_facecolor("#f8f9fa")
+    fig.patch.set_facecolor("#f8f9fa")
+
+    # ── Definição dos blocos ────────────────────────────────────────────────────
+    components = [
+        {
+            "x": 0.3, "y": 1.0, "w": 2.8, "h": 3.0,
+            "color": "#1565c0", "label": "[ WEB ]\n(Frontend)",
+            "sub": "JavaScript / TypeScript",
+            "repo": "Fiap_Pos_9IADT_Fase_01_WEB",
+            "detail": "Interface web para\ntriagem clinica",
+        },
+        {
+            "x": 4.6, "y": 1.0, "w": 2.8, "h": 3.0,
+            "color": "#2e7d32", "label": "[ API ]\n(Flask / FastAPI)",
+            "sub": "Python - REST",
+            "repo": "Fiap_Pos_9AIDT_Fase_01_API",
+            "detail": "Endpoints de predicao\ne integracao",
+        },
+        {
+            "x": 8.9, "y": 1.0, "w": 2.8, "h": 3.0,
+            "color": "#6a1b9a", "label": "[ ML ]\n(XGBoost)",
+            "sub": "Python - Jupyter",
+            "repo": "Fiap_Pos_9AIDT_Fase_01_ML",
+            "detail": "Modelo treinado\n+ artefatos (.joblib)",
+        },
+    ]
+
+    for comp in components:
+        cx, cy, cw, ch = comp["x"], comp["y"], comp["w"], comp["h"]
+        # sombra
+        shadow = FancyBboxPatch(
+            (cx + 0.07, cy - 0.07), cw, ch,
+            boxstyle="round,pad=0.1",
+            linewidth=0, facecolor="#cccccc", zorder=1,
+        )
+        ax.add_patch(shadow)
+        # caixa principal
+        box = FancyBboxPatch(
+            (cx, cy), cw, ch,
+            boxstyle="round,pad=0.1",
+            linewidth=1.5, edgecolor=comp["color"],
+            facecolor="white", zorder=2,
+        )
+        ax.add_patch(box)
+        # cabeçalho colorido
+        header = FancyBboxPatch(
+            (cx, cy + ch - 1.1), cw, 1.1,
+            boxstyle="round,pad=0.1",
+            linewidth=0, facecolor=comp["color"], zorder=3,
+        )
+        ax.add_patch(header)
+        # título no cabeçalho
+        ax.text(
+            cx + cw / 2, cy + ch - 0.55,
+            comp["label"],
+            ha="center", va="center",
+            fontsize=10, fontweight="bold", color="white", zorder=4,
+        )
+        # subtítulo (linguagem)
+        ax.text(
+            cx + cw / 2, cy + ch - 1.45,
+            comp["sub"],
+            ha="center", va="center",
+            fontsize=8, color=comp["color"], fontstyle="italic", zorder=4,
+        )
+        # detalhe
+        ax.text(
+            cx + cw / 2, cy + 0.85,
+            comp["detail"],
+            ha="center", va="center",
+            fontsize=8, color="#444444", zorder=4,
+        )
+        # nome do repositório
+        ax.text(
+            cx + cw / 2, cy + 0.22,
+            comp["repo"],
+            ha="center", va="center",
+            fontsize=6.5, color="#888888", zorder=4,
+        )
+
+    # ── Setas HTTP entre os blocos ───────────────────────────────────────────────
+    arrow_style = dict(
+        arrowstyle="<->",
+        color="#555555",
+        lw=1.8,
+        connectionstyle="arc3,rad=0.0",
+    )
+    ax.annotate(
+        "", xy=(4.6, 2.55), xytext=(3.1, 2.55),
+        arrowprops=arrow_style, zorder=5,
+    )
+    ax.text(3.85, 2.80, "HTTP / JSON", ha="center", va="bottom", fontsize=7.5, color="#555")
+
+    ax.annotate(
+        "", xy=(8.9, 2.55), xytext=(7.4, 2.55),
+        arrowprops=arrow_style, zorder=5,
+    )
+    ax.text(8.15, 2.80, "joblib / predicao", ha="center", va="bottom", fontsize=7.5, color="#555")
+
+    # ── Título e rodapé ──────────────────────────────────────────────────────────
+    ax.text(
+        6.0, 4.65,
+        "Arquitetura dos Componentes - Tech Challenge Fase 1",
+        ha="center", va="center",
+        fontsize=12, fontweight="bold", color="#1a237e",
+    )
+    ax.text(
+        6.0, 0.35,
+        "Usuario -> WEB -> API -> ML Model  |  Cada camada possui repositorio Git independente",
+        ha="center", va="center",
+        fontsize=7.5, color="#888888",
+    )
+
+    plt.tight_layout(pad=0.3)
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("ascii")
+
+
 # ── HTML do relatório ──────────────────────────────────────────────────────────
 
 CSS_STYLE = """
@@ -402,12 +541,23 @@ code { padding: 1pt 3pt; }
     border-radius: 0 3pt 3pt 0;
 }
 
+/* Diagrama de arquitetura */
+.arch-diagram {
+    text-align: center;
+    margin: 16pt 0 6pt 0;
+    page-break-inside: avoid;
+}
+.arch-diagram img {
+    max-width: 100%;
+    border: 0.5pt solid #ddd;
+}
+
 /* TOC */
 .toc-item { margin: 3pt 0; font-size: 9.5pt; }
 """
 
 
-def build_html(images: dict, generated_at: str) -> str:
+def build_html(images: dict, generated_at: str, arch_b64: str = "") -> str:
     """Monta o HTML completo do relatório."""
 
     # ── Seções de gráficos ──────────────────────────────────────────────────────
@@ -426,6 +576,47 @@ def build_html(images: dict, generated_at: str) -> str:
         + build_chart_section(31, images)  # Fig 9 – feature importance RF
         + build_chart_section(32, images)  # Fig 10/11 – SHAP
     )
+
+    arch_section = ""
+    if arch_b64:
+        arch_section = f"""
+<!-- ══ 10. ARQUITETURA ═══════════════════════════════════════════════════════ -->
+<h1>10. Arquitetura dos Componentes</h1>
+<p>
+  A solução é composta por três camadas independentes que se comunicam via HTTP/JSON.
+  Cada camada possui seu próprio repositório Git e pode ser implantada separadamente.
+</p>
+<div class="arch-diagram">
+  <img src="data:image/png;base64,{arch_b64}" alt="Diagrama de arquitetura dos componentes" />
+  <p class="chart-caption"><strong>Fig. Arq.</strong> – Diagrama de arquitetura: WEB → API → Modelo ML</p>
+</div>
+<table>
+  <tr>
+    <th>Camada</th>
+    <th>Tecnologia</th>
+    <th>Responsabilidade</th>
+    <th>Repositório</th>
+  </tr>
+  <tr>
+    <td><strong>WEB</strong> (Frontend)</td>
+    <td>JavaScript / TypeScript</td>
+    <td>Interface de triagem para profissionais de saúde</td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9IADT_Fase_01_WEB">Fiap_Pos_9IADT_Fase_01_WEB</a></td>
+  </tr>
+  <tr>
+    <td><strong>API</strong> (Backend)</td>
+    <td>Python · Flask / FastAPI</td>
+    <td>Endpoints REST que recebem dados e retornam predições</td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_API">Fiap_Pos_9AIDT_Fase_01_API</a></td>
+  </tr>
+  <tr>
+    <td><strong>ML</strong> (Modelo)</td>
+    <td>Python · XGBoost / scikit-learn</td>
+    <td>Modelo treinado, imputer e scaler persistidos via joblib</td>
+    <td><a href="https://github.com/Etyonamine/Fiap_Pos_9AIDT_Fase_01_ML">Fiap_Pos_9AIDT_Fase_01_ML</a></td>
+  </tr>
+</table>
+"""
 
     return f"""<!DOCTYPE html>
 <html lang="pt-BR">
@@ -931,6 +1122,8 @@ proba = model.predict_proba(X_imputed)[:, 1]   # P(violência sexual)
   é sempre responsabilidade do médico ou enfermeiro.
 </div>
 
+{arch_section}
+
 </body>
 </html>"""
 
@@ -955,8 +1148,10 @@ def main():
     print(f"   {sum(len(v) for v in images.values())} imagem(ns) extraída(s) de {len(images)} célula(s).")
 
     generated_at = datetime.now().strftime("%d/%m/%Y %H:%M")
+    print("🏗️  Construindo diagrama de arquitetura...")
+    arch_b64 = generate_architecture_image()
     print("🏗️  Construindo HTML...")
-    html_content = build_html(images, generated_at)
+    html_content = build_html(images, generated_at, arch_b64)
 
     print("🖨️  Convertendo para PDF (WeasyPrint)...")
     HTML(string=html_content, base_url=".").write_pdf(OUTPUT_FILE)
