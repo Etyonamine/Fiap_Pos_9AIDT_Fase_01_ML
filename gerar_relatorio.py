@@ -34,9 +34,10 @@ from datetime import datetime
 
 
 # ── Configurações ──────────────────────────────────────────────────────────────
-NOTEBOOK_PATH = "TechChallengeTriagemFeminino.ipynb"
-OUTPUT_DIR    = "documentos"
-OUTPUT_FILE   = os.path.join(OUTPUT_DIR, "TechChallenge_Fase1_Relatorio_Completo.pdf")
+NOTEBOOK_PATH  = "TechChallengeTriagemFeminino.ipynb"
+OUTPUT_DIR     = "documentos"
+OUTPUT_FILE    = os.path.join(OUTPUT_DIR, "TechChallenge_Fase1_Relatorio_Completo.pdf")
+DIAGRAM_PATH   = "diagrama_componentes_solucao.png"
 
 # Mapeamento: índice da célula → (número da figura, legenda, texto de interpretação)
 CHART_META = {
@@ -407,7 +408,7 @@ code { padding: 1pt 3pt; }
 """
 
 
-def build_html(images: dict, generated_at: str) -> str:
+def build_html(images: dict, generated_at: str, diagram_base64: str = "") -> str:
     """Monta o HTML completo do relatório."""
 
     # ── Seções de gráficos ──────────────────────────────────────────────────────
@@ -931,6 +932,15 @@ proba = model.predict_proba(X_imputed)[:, 1]   # P(violência sexual)
   é sempre responsabilidade do médico ou enfermeiro.
 </div>
 
+<!-- ══ 10. Diagrama de componentes ════════════════════════════════════════════════ -->
+<h1>10. Arquitetura de Componentes</h1>
+<p>
+  O diagrama abaixo ilustra a arquitetura da solução proposta, destacando a interação entre os diferentes componentes:
+</p>
+<br />
+<img src="data:image/png;base64,{diagram_base64}" alt="Diagrama de Componentes" />
+
+
 </body>
 </html>"""
 
@@ -955,8 +965,18 @@ def main():
     print(f"   {sum(len(v) for v in images.values())} imagem(ns) extraída(s) de {len(images)} célula(s).")
 
     generated_at = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    # Carregar diagrama de componentes como base64
+    diagram_base64 = ""
+    if os.path.exists(DIAGRAM_PATH):
+        with open(DIAGRAM_PATH, "rb") as fh:
+            diagram_base64 = base64.b64encode(fh.read()).decode("utf-8")
+        print(f"🖼️  Diagrama carregado: {DIAGRAM_PATH}")
+    else:
+        print(f"⚠️  Diagrama não encontrado: {DIAGRAM_PATH} (será omitido no PDF)")
+
     print("🏗️  Construindo HTML...")
-    html_content = build_html(images, generated_at)
+    html_content = build_html(images, generated_at, diagram_base64)
 
     print("🖨️  Convertendo para PDF (WeasyPrint)...")
     HTML(string=html_content, base_url=".").write_pdf(OUTPUT_FILE)
