@@ -558,7 +558,7 @@ code { padding: 1pt 3pt; }
 """
 
 
-def build_html(images: dict, generated_at: str) -> str:
+def build_html(images: dict, generated_at: str, arch_b64: str = "") -> str:
     """Monta o HTML completo do relatório."""
 
     # ── Seções de gráficos ──────────────────────────────────────────────────────
@@ -1147,8 +1147,18 @@ def main():
     print(f"   {sum(len(v) for v in images.values())} imagem(ns) extraída(s) de {len(images)} célula(s).")
 
     generated_at = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    # Carregar diagrama de componentes como base64
+    arch_b64 = ""
+    if os.path.exists(DIAGRAM_PATH):
+        with open(DIAGRAM_PATH, "rb") as fh:
+            arch_b64 = base64.b64encode(fh.read()).decode("utf-8")
+        print(f"🖼️  Diagrama carregado: {DIAGRAM_PATH}")
+    else:
+        print(f"⚠️  Diagrama não encontrado: {DIAGRAM_PATH} (será omitido no PDF)")
+
     print("🏗️  Construindo HTML...")
-    html_content = build_html(images, generated_at)
+    html_content = build_html(images, generated_at, arch_b64)
 
     print("🖨️  Convertendo para PDF (WeasyPrint)...")
     HTML(string=html_content, base_url=".").write_pdf(OUTPUT_FILE)
