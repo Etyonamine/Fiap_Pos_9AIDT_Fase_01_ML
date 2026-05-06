@@ -669,7 +669,7 @@ def build_html(images: dict, generated_at: str, arch_b64: str = "") -> str:
     </tr>
     <tr>
       <td>
-        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Video - apresentação do Tech Challenge</a>
+        <a href="https://youtu.be/7bBNGlee5nI">Video - apresentação do Tech Challenge</a>
       </td>
     </tr>
   </table>
