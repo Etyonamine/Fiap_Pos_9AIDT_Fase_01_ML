@@ -35,7 +35,6 @@ O objetivo é auxiliar profissionais de saúde na **triagem clínica**, identifi
 
 ```
 .
-├── TechChallengeTriagemFeminino.ipynb  # Notebook principal
 ├── requirements.txt                    # Dependências Python
 ├── data/                               # Dados de entrada (arquivos .zip com CSVs do SINAN)
 │   ├── violencia_BR_2010_a_2018.zip
@@ -44,16 +43,17 @@ O objetivo é auxiliar profissionais de saúde na **triagem clínica**, identifi
 │   └── violencia_BR_2025.zip
 ├── model/                              # Artefatos do modelo treinado (gerados pelo notebook)
 │   ├── xgb_viol_sexu.joblib            # Modelo XGBoost treinado
-│   ├── torch_mlp_viol_sexu.pt          # Modelo MLP em PyTorch
 │   ├── imputer.joblib                  # Imputador de valores ausentes (mediana)
 │   ├── scaler.joblib                   # StandardScaler (Regressão Logística)
-│   ├── torch_mean.joblib               # Média para normalização em PyTorch
-│   ├── torch_std.joblib                # Desvio padrão para normalização em PyTorch
 │   └── feature_columns.joblib          # Lista de colunas de entrada esperadas
+├── notebook/                           # Notebooks Jupyter
+│   └── TechChallengeTriagemFeminino.ipynb  # Notebook principal
 └── documentos/                         # Documentação de referência
-    ├── DIC_DADOS_NET_Violencias_v5.pdf # Dicionário de dados SINAN
-    ├── IADT - Fase 1 - Tech challenge A.pdf
-    └── relatorio-notebook-machine-learning.pdf
+    ├── DIC_DADOS_NET_Violencias_v5.pdf                 # Dicionário de dados SINAN
+    ├── IADT - Fase 1 - Tech challenge A.pdf            # Enunciado do Tech Challenge
+    ├── TechChallenge_Fase1_Relatorio_Completo.pdf      # Relatório do projeto
+    ├── TechChallenge_Fase1_Apresentacao_3_Slides.pptx # Apresentação do projeto
+    └── diagrama_componentes_solucao.png                # Diagrama de componentes da solução
 ```
 
 ---
@@ -101,7 +101,7 @@ As principais bibliotecas utilizadas são:
 | `matplotlib` / `seaborn` | ≥ 3.7 / ≥ 0.13 | Visualizações |
 | `scikit-learn` | ≥ 1.3 | Pré-processamento e modelos |
 | `xgboost` | ≥ 2.0 | Modelo principal (XGBoost) |
-| `torch` | ≥ 2.2 | Pré-processamento em tensor e treinamento/inferência com CUDA quando disponível |
+| `torch` | ≥ 2.2 | Disponível no ambiente, com suporte a CUDA |
 | `shap` | ≥ 0.43 | Explicabilidade do modelo |
 | `jupyter` | ≥ 1.0 | Ambiente do notebook |
 
@@ -136,7 +136,7 @@ jupyter lab
 No navegador, navegue até o arquivo:
 
 ```
-TechChallengeTriagemFeminino.ipynb
+notebook/TechChallengeTriagemFeminino.ipynb
 ```
 
 ### 3. Execute as células em ordem
@@ -198,33 +198,32 @@ Prepara os dados para a modelagem:
 - **Tratamento da variável-alvo** (`VIOL_SEXU`): binarizada em 1 (violência sexual) e 0 (demais), com remoção de registros com valor ignorado (9).
 - **Encoding**: valores binários `1→1`, `2→0`, `9→NaN`; variáveis categóricas recebem One-Hot Encoding.
 - **Imputação**: valores ausentes são substituídos pela **mediana** (`SimpleImputer`), robusta a outliers.
-- **Normalização em PyTorch**: após split, os tensores são normalizados com média/desvio do treino no dispositivo selecionado (`cuda` quando disponível, senão `cpu`).
+- **Normalização**: após o split, os dados de treino são normalizados com `StandardScaler` (utilizado pela Regressão Logística).
 - **Análise de correlação**: heatmap e gráficos de barras mostrando as features com maior correlação positiva e negativa com o target.
 
 ---
 
 ### 4️⃣ Modelagem
 
-Configura quatro modelos de classificação para comparação:
+Configura três modelos de classificação para comparação:
 
 | Modelo | Tipo | Configuração principal |
 |---|---|---|
 | **Logistic Regression** | Linear | `class_weight='balanced'`, `max_iter=500` |
 | **Random Forest** | Ensemble (Bagging) | 200 árvores, `max_depth=8`, `class_weight='balanced'` |
-| **XGBoost** | Ensemble (Boosting) | 200 estimadores, `max_depth=6`, `scale_pos_weight` ajustado para desbalanceamento e uso de GPU quando disponível |
-| **PyTorch MLP** | Rede Neural (MLP) | Treinamento em mini-batches com `BCEWithLogitsLoss` e execução em `cuda`/`cpu` |
+| **XGBoost** | Ensemble (Boosting) | 200 estimadores, `max_depth=6`, `scale_pos_weight` ajustado para desbalanceamento |
 
-A divisão dos dados é **80% treino / 20% teste**, estratificada para preservar a proporção da classe positiva. Os dados de treino e teste são normalizados com `StandardScaler` para uso na Regressão Logística e também com tensores PyTorch para o MLP (com aceleração CUDA quando disponível).
+A divisão dos dados é **80% treino / 20% teste**, estratificada para preservar a proporção da classe positiva. Os dados de treino e teste são normalizados com `StandardScaler` para uso na Regressão Logística.
 
 ---
 
 ### 5️⃣ Treinamento e Avaliação dos Modelos
 
-Treina os quatro modelos e produz:
+Treina os três modelos e produz:
 
 - **Tabela comparativa de métricas**: Acurácia, Precisão, Recall, F1-Score e ROC-AUC para cada modelo (células em verde = melhor valor por métrica).
 - **Matrizes de confusão**: visualização dos acertos e erros de cada modelo no conjunto de teste.
-- **Curvas ROC**: comparação da capacidade discriminativa dos quatro modelos.
+- **Curvas ROC**: comparação da capacidade discriminativa dos três modelos.
 - **Feature Importance** (Random Forest): as 15 variáveis com maior importância média (Gini).
 - **SHAP** (XGBoost): gráficos de barra e beeswarm mostrando o impacto de cada feature nas previsões do modelo.
 - **Relatório de classificação** do melhor modelo (maior F1-Score).
@@ -253,10 +252,7 @@ Salva os artefatos necessários para carregar o modelo treinado em uma API (ex.:
 joblib.dump(modelo_xgb,      "model/xgb_viol_sexu.joblib")
 joblib.dump(imputer,         "model/imputer.joblib")
 joblib.dump(scaler,          "model/scaler.joblib")
-joblib.dump(torch_mean,      "model/torch_mean.joblib")
-joblib.dump(torch_std,       "model/torch_std.joblib")
 joblib.dump(feature_columns, "model/feature_columns.joblib")
-torch.save(modelo_torch.state_dict(), "model/torch_mlp_viol_sexu.pt")
 ```
 
 ---
@@ -270,9 +266,6 @@ Após a execução completa do notebook, a pasta `model/` conterá:
 | `xgb_viol_sexu.joblib` | Modelo XGBoost treinado (classificador principal) |
 | `imputer.joblib` | `SimpleImputer(strategy='median')` ajustado nos dados de treino |
 | `scaler.joblib` | `StandardScaler` ajustado nos dados de treino |
-| `torch_mlp_viol_sexu.pt` | Pesos da rede neural MLP em PyTorch |
-| `torch_mean.joblib` | Vetor de média para normalização de entrada do MLP |
-| `torch_std.joblib` | Vetor de desvio padrão para normalização de entrada do MLP |
 | `feature_columns.joblib` | Lista com os nomes das colunas de entrada, na ordem exata esperada pelo modelo |
 
 Para carregar o modelo em outra aplicação:
@@ -299,7 +292,6 @@ proba = model.predict_proba(X_imputed)[:, 1]  # probabilidade de violência sexu
 | 1 | **Random Forest** | Ensemble (Bagging) | Robusto, estável, boa interpretabilidade via Feature Importance |
 | 2 | **XGBoost** | Ensemble (Boosting) | Alta performance em dados tabulares desbalanceados; modelo persistido |
 | 3 | **Logistic Regression** | Linear | Interpretável, rápido, serve como baseline de comparação |
-| 4 | **PyTorch MLP** | Rede Neural | Permite uso de CUDA para treino/inferência quando houver GPU disponível |
 
 ---
 
@@ -330,4 +322,6 @@ As métricas calculadas para cada modelo são:
 
 - `documentos/DIC_DADOS_NET_Violencias_v5.pdf` — Dicionário de variáveis do SINAN
 - `documentos/IADT - Fase 1 - Tech challenge A.pdf` — Enunciado do Tech Challenge
-- `documentos/relatorio-notebook-machine-learning.pdf` — Relatório do projeto
+- `documentos/TechChallenge_Fase1_Relatorio_Completo.pdf` — Relatório completo do projeto
+- `documentos/TechChallenge_Fase1_Apresentacao_3_Slides.pptx` — Apresentação do projeto (3 slides)
+- `documentos/diagrama_componentes_solucao.png` — Diagrama de componentes da solução
